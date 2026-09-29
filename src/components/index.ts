@@ -34,6 +34,8 @@ export type {
 } from './FormField'
 export { Sparkline } from './Sparkline'
 export type { SparklineProps } from './Sparkline'
+export { ParameterDiff } from './ParameterDiff'
+export type { ParameterDiffProps } from './ParameterDiff'
 export { SessionTimeoutModal } from './SessionTimeoutModal'
 export type { SessionTimeoutModalProps } from './SessionTimeoutModal'
 export { SocialAccountConflictWarning } from './SocialAccountConflictWarning'

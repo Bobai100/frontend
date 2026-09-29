@@ -92,6 +92,18 @@ export function Footer() {
               {t('talk')}
             </a>
             <Link
+              href="/governance/timelock"
+              className="hb-textlink"
+              style={{
+                color: 'var(--ink-40)',
+                textDecoration: 'none',
+                fontFamily: 'inherit',
+                fontSize: 13,
+              }}
+            >
+              {t('governance')}
+            </Link>
+            <Link
               href="/admin"
               className="hb-textlink"
               style={{

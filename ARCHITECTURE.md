@@ -129,6 +129,18 @@ The investment pool is governed by Soroban smart contract logic mirroring ERC-46
   - `WhitelistController.set_creator_status(address, status)`: Approving or revoking creator whitelist permissions.
 - **Relevant Vault / Client Function:** Future privileged `AdminClient` / `OracleClient` (currently simulated via local state in `src/screens/admin/AdminConsole.tsx`).
 
+### 2.10 Governance / Timelock
+- **Route:** `/governance/timelock` (`src/app/governance/timelock`, `src/screens/governance/*`)
+- **Current Data Source:** Typed fixtures (`src/data/governance.ts`) when `NEXT_PUBLIC_TIMELOCK_CONTRACT_ID` is unset; live Soroban reads otherwise.
+- **Soroban Read Dependency (`TimelockController`):**
+  - `get_queue()`: Pending actions (id, proposal, proposer, `eta`) with the parameter changes each carries.
+  - `get_history()`: Executed + cancelled actions with before/after parameter values.
+  - `is_guardian(address)` / `is_permissionless()`: Role detection for the Cancel (guardian) and Execute (permissionless after ETA) controls.
+- **Soroban Write Dependency:**
+  - `execute(id)`: Publishes the queued values once the ETA has passed (permissionless when the controller allows).
+  - `cancel(id)`: Guardians cancel a queued action before its ETA.
+- **Client / Impact Layer:** `src/lib/governance/timelock.ts` (state derivation: queued / ready / expired + 6h grace window), `src/lib/governance/params.ts` (parameter registry shared with the proposal wizard), `src/lib/governance/impact.ts` (what a change does to an investor's open positions), and the shared `src/components/ParameterDiff.tsx` diff viewer. Contract calls go through the shared pipeline in `src/wallet/contractTx.ts` (§4).
+
 ---
 
 ## 3. Summary Architecture Matrix
@@ -144,6 +156,7 @@ The investment pool is governed by Soroban smart contract logic mirroring ERC-46
 | **Withdraw** | `/withdraw` | Live Soroban / Mock fallback | `share_price`, `convert_to_assets`, `max_withdraw` | `withdraw(shares, min_assets)` | `vault.convertToAssets`, `submitWithdraw`, `previewWithdraw` |
 | **Creator** | `/creator` | Fixtures (`data/creator.ts`) | `get_status`, `get_creator_projects`, oracle scores | *Future:* `apply_whitelist`, `create_project` | Future `CreatorClient` |
 | **Admin / Oracle** | `/admin` | Fixtures + In-Memory State | Vault stats, registry entries, creator whitelist | *Future:* `push_scores`, `fund_project`, whitelist updates | Future `OracleClient` / `AdminClient` |
+| **Governance / Timelock** | `/governance/timelock` | Live Soroban / Fixture fallback | `get_queue`, `get_history`, `is_guardian`, `is_permissionless` | `execute(id)`, `cancel(id)` | `fetchTimelockQueue`, `submitExecuteAction`, `submitCancelAction` (via `contractTx`) |
 
 ---
 
